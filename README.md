@@ -1,3 +1,3 @@
-# Alias Manager
+# Bash scripts
 
-Bash script to add/delete aliases to ~/bashrc instead of opening the file itself and write
+Scripts for the lazy me
