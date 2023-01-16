@@ -145,7 +145,7 @@ alias lla='lsd -lha --group-dirs=first'
 alias ls='lsd --group-dirs=first'
 alias catnp='bat --no-paging'
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-source /home/dmt/powerlevel10k/powerlevel10k.zsh-theme
+source ~/powerlevel10k/powerlevel10k.zsh-theme
 source /usr/share/zshSudo/sudo.plugin.zsh
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
