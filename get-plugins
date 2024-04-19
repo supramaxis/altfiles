@@ -1,0 +1,120 @@
+#!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
+
+# Define color codes
+# RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+RESET='\033[0m'
+
+function log() {
+  echo -e "[init] $*"
+}
+
+declare -A plugin_names=(
+  [60623]="sleep-most"
+  [19286]="minepacks"
+  [104616]="healthbar-reloaded"
+  [109679]="bolt"
+  [84134]="better-revive"
+  [34315]="Vault"
+  [6245]="PlaceholderAPI"
+)
+
+declare -A plugin_urls=(
+  ["LuckPerms"]="https://download.luckperms.net/1534/bukkit/loader/LuckPerms-Bukkit-5.4.121.jar"
+  ["ProtocolLib"]="https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/build/libs/ProtocolLib.jar"
+  ["FastLogin"]="https://ci.codemc.io/job/Games647/job/FastLogin/lastSuccessfulBuild/artifact/bukkit/target/FastLoginBukkit.jar"
+  ["AuthMe"]="https://ci.codemc.io/job/AuthMe/job/AuthMeReloaded/lastSuccessfulBuild/artifact/target/AuthMe-5.6.0-SNAPSHOT.jar"
+  ["Graves"]="https://gitlab.com/ranull/minecraft/graves/uploads/2dcf3200faf0f76ab098269225436fe0/Graves-4.9.1.2.jar"
+  ["nbt-api"]="https://cdn.modrinth.com/data/nfGCP9fk/versions/a7LQG0Ls/item-nbt-api-plugin-2.12.3.jar"
+  ["SkinsRestorer"]="https://github.com/SkinsRestorer/SkinsRestorer/releases/latest/download/SkinsRestorer.jar"
+)
+
+containsJars() {
+  file=${1?}
+
+  pat='\.jar$'
+
+  while read -r line; do
+    if [[ $line =~ $pat ]]; then
+      return 0
+    fi
+  done <<< "$(unzip -l "$file")"
+
+  return 1
+}
+data_dir="$PWD/data/plugins"
+
+
+getResourceFromSpiget() {
+  resource=${1?}
+
+  log "Downloading resource ${plugin_names[$resource]}.jar ..."
+  mkdir -p "$PWD/tmp"
+  tmpfile="$PWD/tmp/${resource}.zip"
+  url="https://api.spiget.org/v2/resources/${resource}/download"
+  # shellcheck disable=SC2154
+  if ! curl -o "${tmpfile}" -fsSL -H "User-Agent: itzg/minecraft-server" "${extraCurlArgs[@]}" "${url}"; then
+    log "ERROR failed to download resource '${resource}' from ${url}"
+    exit 2
+  fi
+
+  mkdir -p "$PWD/data/plugins"
+  if containsJars "${tmpfile}"; then
+    log "Extracting contents of resource ${resource} into plugins"
+    unzip -o -q -d "$data_dir" "${tmpfile}"
+    rm "${tmpfile}"
+  else
+    log "Moving resource ${plugin_names[$resource]}.jar into plugins"
+    mv "${tmpfile}" "$data_dir/${resource}.jar"
+  fi
+
+  if [[ ${plugin_names[$resource]+isset} ]]; then
+    new_filename="${plugin_names[$resource]}.jar"
+    mv "$data_dir"/"${resource}.jar" "$data_dir"/"$new_filename"
+    log "${GREEN}Downloaded and renamed plugin: $resource -> $new_filename${RESET}"
+  else
+   log "${YELLOW}Warning: No name mapping found for resource ID: $resource. Downloaded as ${resource}.jar${RESET}"
+  fi
+
+}
+
+  log "Getting plugins via Spiget"
+  for resource_id in "${!plugin_names[@]}"
+  do
+  resource="${resource_id}"
+    getResourceFromSpiget "${resource}"
+  done
+
+rm -r "$PWD/tmp"
+log "Downloading additional plugins"
+
+  for plugin in "${!plugin_urls[@]}"; do
+    
+    log "${YELLOW}Downloading $plugin...${RESET}"
+    url="${plugin_urls[$plugin]}"
+
+    wget -q -P "$data_dir" "$url"
+
+    log "${GREEN}$plugin downloaded${RESET}" 
+
+  done
+
+log "${YELLOW}Downloading GeyserMC${RESET}"
+wget -q https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot -O "$data_dir/Geyser-Spigot.jar"
+log "${GREEN}GeyserMC downloaded${RESET}"
+
+log "${YELLOW}Downloading Floodgate${RESET}"
+wget -q https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot -O "$data_dir/Floodgate-Spigot.jar"
+log "${GREEN}Floodgate downloaded${RESET}"
+
+log "${YELLOW}Downloading EssentialsX${RESET}"
+wget -q -P "$data_dir" "$(curl -s https://api.github.com/repos/EssentialsX/Essentials/releases/latest  | jq -r '.assets[] | select(.name | contains ("EssentialsX-")) | .browser_download_url')"
+log "${GREEN}EssentialsX Downloaded${RESET}"
+
+log "${YELLOW}Downloading EssentialsX Chat${RESET}"
+wget -q -P "$data_dir" "$(curl -s https://api.github.com/repos/EssentialsX/Essentials/releases/latest  | jq -r '.assets[] | select(.name | contains ("EssentialsXChat")) | .browser_download_url')"
+log "${GREEN}EssentialsX Chat Downloaded${RESET}"
+
