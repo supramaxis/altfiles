@@ -89,32 +89,45 @@ getResourceFromSpiget() {
   done
 
 rm -r "$PWD/tmp"
-log "Downloading additional plugins"
-
-  for plugin in "${!plugin_urls[@]}"; do
-    
-    log "${YELLOW}Downloading $plugin...${RESET}"
-    url="${plugin_urls[$plugin]}"
-
-    wget -q -P "$data_dir" "$url"
-
-    log "${GREEN}$plugin downloaded${RESET}" 
-
-  done
+  if wget -q -P "$data_dir" "$url"; then
+    log "${GREEN}$plugin downloaded${RESET}"
+  else
+    log "ERROR: Failed to download $plugin from $url"
+    exit 1
+  fi
+done
 
 log "${YELLOW}Downloading GeyserMC${RESET}"
-wget -q https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot -O "$data_dir/Geyser-Spigot.jar"
-log "${GREEN}GeyserMC downloaded${RESET}"
+if wget -q https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot -O "$data_dir/Geyser-Spigot.jar"; then
+  log "${GREEN}GeyserMC downloaded${RESET}"
+else
+  log "ERROR: Failed to download GeyserMC"
+  exit 1
+fi
 
 log "${YELLOW}Downloading Floodgate${RESET}"
-wget -q https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot -O "$data_dir/Floodgate-Spigot.jar"
-log "${GREEN}Floodgate downloaded${RESET}"
+if wget -q https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot -O "$data_dir/Floodgate-Spigot.jar"; then
+  log "${GREEN}Floodgate downloaded${RESET}"
+else
+  log "ERROR: Failed to download Floodgate"
+  exit 1
+fi
 
 log "${YELLOW}Downloading EssentialsX${RESET}"
-wget -q -P "$data_dir" "$(curl -s https://api.github.com/repos/EssentialsX/Essentials/releases/latest  | jq -r '.assets[] | select(.name | contains ("EssentialsX-")) | .browser_download_url')"
-log "${GREEN}EssentialsX Downloaded${RESET}"
+essentials_url=$(curl -s https://api.github.com/repos/EssentialsX/Essentials/releases/latest | jq -r '.assets[] | select(.name | contains ("EssentialsX-")) | .browser_download_url')
+if wget -q -P "$data_dir" "$essentials_url"; then
+  log "${GREEN}EssentialsX Downloaded${RESET}"
+else
+  log "ERROR: Failed to download EssentialsX"
+  exit 1
+fi
 
 log "${YELLOW}Downloading EssentialsX Chat${RESET}"
-wget -q -P "$data_dir" "$(curl -s https://api.github.com/repos/EssentialsX/Essentials/releases/latest  | jq -r '.assets[] | select(.name | contains ("EssentialsXChat")) | .browser_download_url')"
-log "${GREEN}EssentialsX Chat Downloaded${RESET}"
+essentials_chat_url=$(curl -s https://api.github.com/repos/EssentialsX/Essentials/releases/latest | jq -r '.assets[] | select(.name | contains ("EssentialsXChat")) | .browser_download_url')
+if wget -q -P "$data_dir" "$essentials_chat_url"; then
+  log "${GREEN}EssentialsX Chat Downloaded${RESET}"
+else
+  log "ERROR: Failed to download EssentialsX Chat"
+  exit 1
+fi
 
