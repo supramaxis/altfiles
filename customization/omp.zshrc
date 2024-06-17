@@ -36,7 +36,7 @@ autoload -Uz compinit && compinit
 
 zinit cdreplay -q
 
-eval "$(oh-my-posh init zsh)"
+eval "$(oh-my-posh init zsh $HOME/.config/ohmyposh/spm.toml)"
 
 # Keybindings
 bindkey -e
