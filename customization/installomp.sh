@@ -77,21 +77,36 @@ wget -O - https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh |
 
 sudo -u ${USER_NAME} bash << 'EOF'
 cd ~
+mkdir -p $HOME/.config/ohmyposh/
 echo -e "[init] \033[0;32mDownloading .zshrc\033[0m"
 wget -O ~/.zshrc https://raw.githubusercontent.com/supramaxis/scripts/main/customization/omp.zshrc
+wget -O ~/.config/ohmyposh/spm.toml https://raw.githubusercontent.com/supramaxis/scripts/main/customization/spm.toml
 EOF
 
 # Determine architecture
 ARCH=$(uname -m)
 case "$ARCH" in
-  x86_64) LSD_URL="https://github.com/lsd-rs/lsd/releases/download/v1.1.2/lsd-musl_1.1.2_amd64.deb" ;;
-  aarch64) LSD_URL="https://github.com/lsd-rs/lsd/releases/download/v1.1.2/lsd-musl_1.1.2_arm64.deb" ;;
-  *) echo "Unsupported architecture: $ARCH"; exit 1 ;;
+  x86_64)
+    LSD_URL="https://github.com/lsd-rs/lsd/releases/download/v1.1.2/lsd-musl_1.1.2_amd64.deb"
+    VIVID_URL="https://github.com/sharkdp/vivid/releases/download/v0.9.0/vivid-musl_0.9.0_amd64.deb"
+    ;;
+  aarch64)
+    LSD_URL="https://github.com/lsd-rs/lsd/releases/download/v1.1.2/lsd-musl_1.1.2_arm64.deb"
+    VIVID_URL="https://github.com/sharkdp/vivid/releases/download/v0.9.0/vivid_0.9.0_arm64.deb"
+    ;;
+  *)
+    echo "Unsupported architecture: $ARCH"
+    exit 1
+    ;;
 esac
 
 wget "$LSD_URL"
 dpkg -i "$(basename $LSD_URL)"
 rm "$(basename $LSD_URL)"
+
+wget "$VIVID_URL"
+dpkg -i "$(basename "$VIVID_URL")"
+rm "$(basename "$VIVID_URL")"
 
 # Export zoxide path based on where it's installed
 if [ -x "/home/${USER_NAME}/.local/bin/zoxide" ]; then
