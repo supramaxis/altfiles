@@ -20,22 +20,17 @@ function log() {
 }
 
 # Install Zsh if it's not already installed
-if ! [ -x "$(command -v zsh)" ]; then
-  echo "Installing Zsh..."
+if ! command -v zsh &> /dev/null; then
+  log "${GREEN}Installing Zsh${RESET}"
   apt update
   apt install -y zsh
 fi
 
+ZSH_CONFIG_FILES=(~/.zshenv ~/.zprofile ~/.zshrc ~/.zlogin ~/.zlogout ~/.oh-my-zsh)
 
-# Loop through the Zsh configuration files and backup or remove them
-for rc in ~/.zshenv ~/.zprofile ~/.zshrc ~/.zlogin ~/.zlogout ~/.oh-my-zsh; do
+for rc in "${ZSH_CONFIG_FILES[@]}"; do
   if [ -e "$rc" ]; then
-    if [ ! -e ~/zsh-backup/"$(basename "$rc")" ]; then
-      cp -r "$rc" ~/zsh-backup/"$(basename "$rc")"
-      rm -rf "$rc"
-    else
-      rm -rf "$rc"
-    fi
+    cp -r "$rc" ~/zsh-backup/ && rm -rf "$rc"
   fi
 done
 
@@ -45,7 +40,8 @@ function is_installed() {
 }
 
 # Install required packages if they are not already installed
-for pkg in fontconfig unzip git wget nano curl; do
+REQUIRED_PACKAGES=(fontconfig unzip git wget nano curl)
+for pkg in "${REQUIRED_PACKAGES[@]}"; do
   if [ "$(is_installed "$pkg")" -eq 0 ]; then
     log "${GREEN}Installing $pkg${RESET}"
     apt install -y "$pkg"
@@ -55,54 +51,47 @@ for pkg in fontconfig unzip git wget nano curl; do
 done
 
 # Check if fonts are already installed
-if ls /usr/share/fonts/*.ttf 1> /dev/null 2>&1; then
-  log "${GREEN}Fonts are already installed, skipping download.${RESET}"
-else
+if ! ls /usr/share/fonts/*.ttf &> /dev/null; then
   mkdir cascadiacode && cd cascadiacode || exit
-
   log "${GREEN}Installing CascadiaCode font${RESET}"
-
   wget https://github.com/ryanoasis/nerd-fonts/releases/latest/download/CascadiaCode.zip
-
   unzip CascadiaCode.zip
-
-  sudo mv ./*.ttf /usr/share/fonts
+  mv ./*.ttf /usr/share/fonts
   log "${GREEN}Moved downloaded fonts to /usr/share/fonts${RESET}"
-
   fc-cache -fv
-
   cd ..
-
-  log "${GREEN}Removed workdir cascadiacode${RESET}"
   rm -rf cascadiacode
 fi
 
 log "${GREEN}Downloading Oh My Posh${RESET}"
 curl -s https://ohmyposh.dev/install.sh | bash -s
 
-sudo -u ${USER_NAME} bash << 'EOF'
 
-mkdir -p $HOME/.config/ohmyposh/
-cd ~
-echo -e "[init] \033[0;32mDownloading .zshrc and Oh My Posh config\033[0m"
-wget -O ~/.zshrc https://raw.githubusercontent.com/supramaxis/scripts/main/customization/omp.zshrc
-wget -O ~/.config/ohmyposh/spm.toml https://raw.githubusercontent.com/supramaxis/scripts/main/customization/spm.toml
-
-echo -e "[init] \033[0;32mCloning and installing fzf\033[0m"
+log "${GREEN}Cloning and installing fzf${RESET}"
 git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 bash ~/.fzf/install --all
 
-echo -e "[init] \033[0;32mInstalling Zoxide\033[0m"
-wget -O ~/zinstall.sh https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh
-chmod +x ~/zinstall.sh
-bash ~/zinstall.sh
+log "${GREEN}Installing zoxide${RESET}"
+wget -O - https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
 
+
+sudo -u ${USER_NAME} bash << 'EOF'
+cd ~
+echo -e "[init] \033[0;32mDownloading .zshrc\033[0m"
+wget -O ~/.zshrc https://raw.githubusercontent.com/supramaxis/scripts/main/customization/omp.zshrc
 EOF
 
-log "${GREEN}Installing lsd${RESET}"
-wget https://github.com/lsd-rs/lsd/releases/download/v1.1.2/lsd-musl_1.1.2_arm64.deb
-dpkg -i lsd-musl_1.1.2_arm64.deb
-rm lsd-musl_1.1.2_arm64.deb
+# Determine architecture
+ARCH=$(uname -m)
+case "$ARCH" in
+  x86_64) LSD_URL="https://github.com/lsd-rs/lsd/releases/download/v1.1.2/lsd-musl_1.1.2_amd64.deb" ;;
+  aarch64) LSD_URL="https://github.com/lsd-rs/lsd/releases/download/v1.1.2/lsd-musl_1.1.2_arm64.deb" ;;
+  *) echo "Unsupported architecture: $ARCH"; exit 1 ;;
+esac
+
+wget "$LSD_URL"
+dpkg -i "$(basename $LSD_URL)"
+rm "$(basename $LSD_URL)"
 
 # Export zoxide path based on where it's installed
 if [ -x "/home/${USER_NAME}/.local/bin/zoxide" ]; then
@@ -114,10 +103,6 @@ fi
 log "${GREEN}Process complete changing to zsh. Please run source ~/.zshrc${RESET}"
 
 # Determine ZDOTDIR based on whether running as root or not
-if [ "$EUID" -eq 0 ]; then
-  ZDOTDIR=/root
-else
-  ZDOTDIR=/home/${USER_NAME}
-fi
+ZDOTDIR=$([ "$EUID" -eq 0 ] && echo "/root" || echo "/home/${USER_NAME}")
 
 exec zsh -i
