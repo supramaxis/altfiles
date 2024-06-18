@@ -65,5 +65,6 @@ alias vim='nvim'
 alias c='clear'
 
 # Shell integrations
+export LS_COLORS="$(vivid generate molokai)"
 eval "$(fzf --zsh)"
 eval "$(zoxide init --cmd cd zsh)"
