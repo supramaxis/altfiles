@@ -30,7 +30,7 @@ autoload -Uz compinit && compinit
 
 zinit cdreplay -q
 
-eval "$(oh-my-posh init zsh --config $HOME/.config/ohmyposh/spm.toml)"
+eval "$(oh-my-posh init zsh --config 'https://raw.githubusercontent.com/supramaxis/scripts/main/customization/spm.toml')"
 
 # Keybindings
 bindkey -e
