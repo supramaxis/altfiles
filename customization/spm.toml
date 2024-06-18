@@ -13,7 +13,7 @@ console_title_template = '{{ .Shell }} in {{ .Folder }}'
     type = 'path'
     style = 'plain'
     background = 'transparent'
-    foreground = 'blue'
+    foreground = '#77e4f7'
     template = '{{ .Path }}'
 
     [blocks.segments.properties]
@@ -33,6 +33,13 @@ console_title_template = '{{ .Shell }} in {{ .Folder }}'
     [blocks.segments.properties]
       threshold = 5000
 
+  [[blocks.segments]]
+    type = 'session'
+    style = 'plain'
+    foreground = '#d7af87'
+    background = 'transparent'
+    template = ' {{ if .SSHSession }} {{ end }}{{ .UserName }}'
+
 [[blocks]]
   type = 'prompt'
   alignment = 'left'
@@ -43,7 +50,7 @@ console_title_template = '{{ .Shell }} in {{ .Folder }}'
     style = 'plain'
     foreground_templates = [
       "{{if gt .Code 0}}red{{end}}",
-      "{{if eq .Code 0}}magenta{{end}}",
+      "{{if eq .Code 0}}#43d426{{end}}",
     ]
     background = 'transparent'
     template = '❯'
@@ -51,12 +58,12 @@ console_title_template = '{{ .Shell }} in {{ .Folder }}'
 [transient_prompt]
   foreground_templates = [
     "{{if gt .Code 0}}red{{end}}",
-    "{{if eq .Code 0}}magenta{{end}}",
+    "{{if eq .Code 0}}#43d426{{end}}",
   ]
   background = 'transparent'
   template = '❯ '
 
 [secondary_prompt]
-  foreground = 'magenta'
+  foreground = '#43d426'
   background = 'transparent'
   template = '❯❯ '
