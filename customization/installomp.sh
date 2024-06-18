@@ -100,10 +100,12 @@ case "$ARCH" in
     ;;
 esac
 
+log "${GREEN}Installing lsd${RESET}"
 wget "$LSD_URL"
 dpkg -i "$(basename $LSD_URL)"
 rm "$(basename $LSD_URL)"
 
+log "${GREEN}Installing vivid${RESET}"
 wget "$VIVID_URL"
 dpkg -i "$(basename "$VIVID_URL")"
 rm "$(basename "$VIVID_URL")"
