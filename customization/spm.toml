@@ -33,12 +33,12 @@ console_title_template = '{{ .Shell }} in {{ .Folder }}'
     [blocks.segments.properties]
       threshold = 5000
 
-  [[blocks.segments]]
-    type = 'session'
-    style = 'plain'
-    foreground = '#d7af87'
-    background = 'transparent'
-    template = ' {{ if .SSHSession }} {{ end }}{{ .UserName }}'
+#  [[blocks.segments]]
+ #   type = 'session'
+   # style = 'plain'
+  #  foreground = '#d7af87'
+   # background = 'transparent'
+  #  template = ' {{ if .SSHSession }} {{ end }}{{ .UserName }}'
 
 [[blocks]]
   type = 'prompt'
