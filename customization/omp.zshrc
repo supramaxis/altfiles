@@ -1,8 +1,3 @@
-if [[ -f "/opt/homebrew/bin/brew" ]] then
-  # If you're using macOS, you'll want this enabled
-  eval "$(/opt/homebrew/bin/brew shellenv)"
-fi
-
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # Set the directory we want to store zinit and plugins
