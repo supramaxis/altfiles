@@ -116,6 +116,7 @@ if [ -x "/home/${USER_NAME}/.local/bin/zoxide" ]; then
 elif [ -x "/root/.local/bin/zoxide" ]; then
   echo "export PATH=\$PATH:/root/.local/bin" >> /root/.zshrc
 fi
+cp $HOME/.local/bin/zoxide /usr/local/bin
 
 log "${GREEN}Process complete changing to zsh. Please run source ~/.zshrc${RESET}"
 
