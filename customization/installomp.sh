@@ -110,12 +110,6 @@ wget "$VIVID_URL"
 dpkg -i "$(basename "$VIVID_URL")"
 rm "$(basename "$VIVID_URL")"
 
-# Export zoxide path based on where it's installed
-if [ -x "/home/${USER_NAME}/.local/bin/zoxide" ]; then
-  echo "export PATH=\$PATH:/home/${USER_NAME}/.local/bin" >> "/home/${USER_NAME}/.zshrc"
-elif [ -x "/root/.local/bin/zoxide" ]; then
-  echo "export PATH=\$PATH:/root/.local/bin" >> /root/.zshrc
-fi
 cp $HOME/.local/bin/zoxide /usr/local/bin
 
 log "${GREEN}Process complete changing to zsh. Please run source ~/.zshrc${RESET}"
