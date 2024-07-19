@@ -59,12 +59,21 @@ alias ols='/usr/bin/ls'
 alias vim='nvim'
 alias c='clear'
 alias rmd='rm -r'
+alias port='ss -tunelp | grep '
 
 lsz() {
     if [ "$#" -eq 0 ]; then
         du -a -h --max-depth=1 | sort -hr
     else
         du -a -h --max-depth=1 "$@" | sort -hr
+    fi
+}
+
+port() {
+    if [ "$#" -eq 0 ]; then
+        echo 'You need to type a port'
+    else
+        netstat -pna | grep "$@"
     fi
 }
 
